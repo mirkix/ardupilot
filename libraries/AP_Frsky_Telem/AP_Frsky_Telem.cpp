@@ -62,6 +62,7 @@ void AP_Frsky_Telem::init(const AP_SerialManager &serial_manager, const char *fi
     }
     
     if (_port != nullptr) {
+        _frsky_tick = hal.util->perf_alloc(AP_HAL::Util::PC_ELAPSED, "frsky_tick");
         hal.scheduler->register_io_process(FUNCTOR_BIND_MEMBER(&AP_Frsky_Telem::tick, void));
         // we don't want flow control for either protocol
         _port->set_flow_control(AP_HAL::UARTDriver::FLOW_CONTROL_DISABLE);
@@ -310,6 +311,7 @@ void AP_Frsky_Telem::send_D(void)
  */
 void AP_Frsky_Telem::tick(void)
 {
+    hal.util->perf_begin(_frsky_tick);
     // check UART has been initialised
     if (!_initialised_uart) {
         // initialise uart (this must be called from within tick b/c the UART begin must be called from the same thread as it is used from)
@@ -328,6 +330,7 @@ void AP_Frsky_Telem::tick(void)
     } else if (_protocol == AP_SerialManager::SerialProtocol_FrSky_SPort_Passthrough) { // FrSky SPort Passthrough (OpenTX) protocol (X-receivers)
         send_SPort_Passthrough();
     }
+    hal.util->perf_end(_frsky_tick);
 }
 
 /* 

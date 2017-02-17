@@ -142,6 +142,9 @@ private:
     const RangeFinder &_rng;
     AP_HAL::UARTDriver *_port;                  // UART used to send data to FrSky receiver
     AP_SerialManager::SerialProtocol _protocol; // protocol used - detected using SerialManager's SERIAL#_PROTOCOL parameter
+
+    AP_HAL::Util::perf_counter_t _frsky_tick;
+
     bool _initialised_uart;
     uint16_t _crc;
 
