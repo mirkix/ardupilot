@@ -139,6 +139,10 @@ private:
         LowPassFilterVector3f accel_filter{4000, 188};
         LowPassFilterVector3f gyro_filter{8000, 188};
     } _accum;
+
+    AP_HAL::Util::perf_counter_t _invensense_data_ready;
+    AP_HAL::Util::perf_counter_t _invensense_poll_data;
+
 };
 
 class AP_Invensense_AuxiliaryBusSlave : public AuxiliaryBusSlave

@@ -469,6 +469,9 @@ void AP_InertialSensor_Invensense::start()
         AP_HAL::panic("Invensense: Unable to allocate FIFO buffer");
     }
 
+    _invensense_data_ready = hal.util->perf_alloc(AP_HAL::Util::PC_ELAPSED, "invensense_data_ready");
+    _invensense_poll_data = hal.util->perf_alloc(AP_HAL::Util::PC_ELAPSED, "invensense_poll_data");
+
     // start the timer process to read samples
     _dev->register_periodic_callback(1000, FUNCTOR_BIND_MEMBER(&AP_InertialSensor_Invensense::_poll_data, void));
 }
@@ -516,10 +519,13 @@ AuxiliaryBus *AP_InertialSensor_Invensense::get_auxiliary_bus()
  */
 bool AP_InertialSensor_Invensense::_data_ready()
 {
+    hal.util->perf_begin(_invensense_data_ready);
     if (_drdy_pin) {
+        hal.util->perf_end(_invensense_data_ready);
         return _drdy_pin->read() != 0;
     }
     uint8_t status = _register_read(MPUREG_INT_STATUS);
+    hal.util->perf_end(_invensense_data_ready);
     return (status & BIT_RAW_RDY_INT) != 0;
 }
 
@@ -528,7 +534,9 @@ bool AP_InertialSensor_Invensense::_data_ready()
  */
 void AP_InertialSensor_Invensense::_poll_data()
 {
+    hal.util->perf_begin(_invensense_poll_data);
     _read_fifo();
+    hal.util->perf_end(_invensense_poll_data);
 }
 
 bool AP_InertialSensor_Invensense::_accumulate(uint8_t *samples, uint8_t n_samples)
