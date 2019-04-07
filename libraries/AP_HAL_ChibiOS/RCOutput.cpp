@@ -1041,7 +1041,9 @@ void RCOutput::send_pulses_DMAR(pwm_group &group, uint32_t buffer_length)
     stm32_cacheBufferFlush(group.dma_buffer, buffer_length);
     dmaStreamSetMemory0(group.dma, group.dma_buffer);
     dmaStreamSetTransactionSize(group.dma, buffer_length/sizeof(uint32_t));
+#if STM32_DMA_ADVANCED
     dmaStreamSetFIFO(group.dma, STM32_DMA_FCR_DMDIS | STM32_DMA_FCR_FTH_FULL);
+#endif //#if STM32_DMA_ADVANCED
     dmaStreamSetMode(group.dma,
                      STM32_DMA_CR_CHSEL(group.dma_up_channel) |
                      STM32_DMA_CR_DIR_M2P | STM32_DMA_CR_PSIZE_WORD | STM32_DMA_CR_MSIZE_WORD |
@@ -1061,12 +1063,10 @@ void RCOutput::send_pulses_DMAR(pwm_group &group, uint32_t buffer_length)
  */
 void RCOutput::dma_unlock(void *p)
 {
-#if STM32_DMA_ADVANCED
     pwm_group *group = (pwm_group *)p;
     chSysLockFromISR();
     group->dma_handle->unlock_from_IRQ();
     chSysUnlockFromISR();
-#endif
 }
 
 /*
@@ -1211,7 +1211,6 @@ bool RCOutput::serial_write_byte(uint8_t b)
 */
 bool RCOutput::serial_write_bytes(const uint8_t *bytes, uint16_t len)
 {
-#if STM32_DMA_ADVANCED
     if (!serial_group) {
         return false;
     }
@@ -1230,9 +1229,6 @@ bool RCOutput::serial_write_bytes(const uint8_t *bytes, uint16_t len)
     
     serial_group->dma_handle->unlock();
     return true;
-#else
-    return false;
-#endif //#if STM32_DMA_ADVANCED
 }
 
 /*
