@@ -146,6 +146,8 @@ void setup(void)
         hal.rcout->enable_ch(i);
     }
 
+    hal.rcout->set_output_mode(17, AP_HAL::RCOutput::MODE_PWM_DSHOT150);
+    
     iomcu.init();
 
     iomcu.calculate_fw_crc();
