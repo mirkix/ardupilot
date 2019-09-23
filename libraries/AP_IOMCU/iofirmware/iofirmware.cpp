@@ -139,8 +139,8 @@ void setup(void)
         hal.rcout->enable_ch(i);
     }
 
-    hal.rcout->set_output_mode(17, AP_HAL::RCOutput::MODE_PWM_DSHOT150);
-    
+//    hal.rcout->set_output_mode(17, AP_HAL::RCOutput::MODE_PWM_DSHOT150);
+
     iomcu.init();
 
     iomcu.calculate_fw_crc();
@@ -531,6 +531,10 @@ bool AP_IOMCU_FW::handle_code_write()
             }
             break;
 
+        case PAGE_REG_SETUP_OUTPUT_MODE:
+            hal.rcout->set_output_mode(rx_io_packet.regs[0], (AP_HAL::RCOutput::output_mode)rx_io_packet.regs[1]);
+            break;
+
         case PAGE_REG_SETUP_HEATER_DUTY_CYCLE:
             reg_setup.heater_duty_cycle = rx_io_packet.regs[0];
             last_heater_ms = last_ms;
@@ -559,7 +563,7 @@ bool AP_IOMCU_FW::handle_code_write()
                 dsm_bind_state = 1;
             }
             break;
-            
+
         default:
             break;
         }
@@ -751,6 +755,3 @@ void AP_IOMCU_FW::fill_failsafe_pwm(void)
 }
 
 AP_HAL_MAIN();
-
-
-
