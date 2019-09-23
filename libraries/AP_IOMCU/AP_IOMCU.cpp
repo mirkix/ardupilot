@@ -35,7 +35,8 @@ enum ioevents {
     IOEVENT_SET_HEATER_TARGET,
     IOEVENT_SET_DEFAULT_RATE,
     IOEVENT_SET_SAFETY_MASK,
-    IOEVENT_MIXING
+    IOEVENT_MIXING,
+    IOEVENT_SET_OUTPUT_MODE
 };
 
 // max number of consecutve protocol failures we accept before raising
@@ -99,9 +100,9 @@ void AP_IOMCU::thread_main(void)
     uart.begin(1500*1000, 256, 256);
     uart.set_blocking_writes(true);
     uart.set_unbuffered_writes(true);
-    
+
     trigger_event(IOEVENT_INIT);
-    
+
     while (!do_shutdown) {
         eventmask_t mask = chEvtWaitAnyTimeout(~0, chTimeMS2I(10));
 
@@ -150,7 +151,7 @@ void AP_IOMCU::thread_main(void)
             }
         }
 
-        
+
         if (mask & EVENT_MASK(IOEVENT_SET_RATES)) {
             if (!write_register(PAGE_SETUP, PAGE_REG_SETUP_ALTRATE, rate.freq) ||
                 !write_register(PAGE_SETUP, PAGE_REG_SETUP_PWM_RATE_MASK, rate.chmask)) {
@@ -164,7 +165,7 @@ void AP_IOMCU::thread_main(void)
                 !modify_register(PAGE_SETUP, PAGE_REG_SETUP_FEATURES, 0,
                                  P_SETUP_FEATURES_SBUS1_OUT)) {
                 event_failed(IOEVENT_ENABLE_SBUS);
-                continue;                
+                continue;
             }
         }
 
@@ -195,7 +196,14 @@ void AP_IOMCU::thread_main(void)
                 continue;
             }
         }
-        
+
+        if (mask & EVENT_MASK(IOEVENT_SET_OUTPUT_MODE)) {
+            if (!write_registers(PAGE_SETUP, PAGE_REG_SETUP_OUTPUT_MODE, sizeof(mode_out)/2, (const uint16_t *)&mode_out)) {
+                event_failed(IOEVENT_SET_OUTPUT_MODE);
+                continue;
+            }
+        }
+
         if (mask & EVENT_MASK(IOEVENT_SET_SAFETY_MASK)) {
             if (!write_register(PAGE_SETUP, PAGE_REG_SETUP_IGNORE_SAFETY, pwm_out.safety_mask)) {
                 event_failed(IOEVENT_SET_SAFETY_MASK);
@@ -210,7 +218,7 @@ void AP_IOMCU::thread_main(void)
             read_rc_input();
             last_rc_read_ms = AP_HAL::millis();
         }
-        
+
         if (now - last_status_read_ms > 50) {
             // read status at 20Hz
             read_status();
@@ -272,7 +280,7 @@ void AP_IOMCU::send_servo_out()
                 last_servo_out_us = now;
             }
         }
-    }    
+    }
 }
 
 /*
@@ -408,7 +416,7 @@ bool AP_IOMCU::read_registers(uint8_t page, uint8_t offset, uint8_t count, uint1
     IOPacket pkt;
 
     discard_input();
-    
+
     memset(&pkt.regs[0], 0, count*2);
 
     pkt.code = CODE_READ;
@@ -428,7 +436,7 @@ bool AP_IOMCU::read_registers(uint8_t page, uint8_t offset, uint8_t count, uint1
         */
         pkt_size = 4;
     }
-    
+
     pkt.crc = crc_crc8((const uint8_t *)&pkt, pkt_size);
 
     size_t ret = write_wait((uint8_t *)&pkt, pkt_size);
@@ -445,7 +453,7 @@ bool AP_IOMCU::read_registers(uint8_t page, uint8_t offset, uint8_t count, uint1
               AP_HAL::millis(), page, offset, count);
         return false;
     }
-    
+
     uint8_t *b = (uint8_t *)&pkt;
     uint8_t n = uart.available();
     if (n < offsetof(struct IOPacket, regs)) {
@@ -509,7 +517,7 @@ bool AP_IOMCU::write_registers(uint8_t page, uint8_t offset, uint8_t count, cons
         regs += PKT_MAX_REGS;
     }
     IOPacket pkt;
-    
+
     discard_input();
 
     memset(&pkt.regs[0], 0, count*2);
@@ -537,7 +545,7 @@ bool AP_IOMCU::write_registers(uint8_t page, uint8_t offset, uint8_t count, cons
         protocol_fail_count++;
         return false;
     }
-    
+
     uint8_t *b = (uint8_t *)&pkt;
     uint8_t n = uart.available();
     for (uint8_t i=0; i<n; i++) {
@@ -722,6 +730,21 @@ void AP_IOMCU::set_brushed_mode(void)
     trigger_event(IOEVENT_SET_BRUSHED_ON);
 }
 
+// set output mode
+void AP_IOMCU::set_output_mode(uint16_t mask, uint16_t mode)
+{
+//    const uint8_t masks[] = { 0x03,0x0C,0xF0 };
+//    // ensure mask is legal for the timer layout
+//    for (uint8_t i=0; i<ARRAY_SIZE(masks); i++) {
+//        if (chmask & masks[i]) {
+//            chmask |= masks[i];
+//        }
+//    }
+    mode_out.mask = mask;
+    mode_out.mode = mode;
+    trigger_event(IOEVENT_SET_OUTPUT_MODE);
+}
+
 // handling of BRD_SAFETYOPTION parameter
 void AP_IOMCU::update_safety_options(void)
 {
@@ -757,7 +780,7 @@ bool AP_IOMCU::check_crc(void)
 {
     // flash size minus 4k bootloader
 	const uint32_t flash_size = 0x10000 - 0x1000;
-    
+
     fw = AP_ROMFS::find_decompress(fw_name, fw_size);
     if (!fw) {
         hal.console->printf("failed to find %s\n", fw_name);
@@ -796,7 +819,7 @@ bool AP_IOMCU::check_crc(void)
         fw = nullptr;
         AP_BoardConfig::sensor_config_error("Failed to update IO firmware");
     }
-    
+
     free(fw);
     fw = nullptr;
     return false;
@@ -846,7 +869,7 @@ void AP_IOMCU::set_safety_mask(uint16_t chmask)
 {
     if (pwm_out.safety_mask != chmask) {
         pwm_out.safety_mask = chmask;
-        trigger_event(IOEVENT_SET_SAFETY_MASK);        
+        trigger_event(IOEVENT_SET_SAFETY_MASK);
     }
 }
 
