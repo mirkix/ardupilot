@@ -96,6 +96,9 @@ public:
     // set output mode
     void set_output_mode(uint16_t mask, uint16_t mode);
 
+    // set dshot telemetry request mask
+    void set_dshot_telem(uint16_t mask);
+
     // check if IO is healthy
     bool healthy(void);
 
@@ -206,6 +209,8 @@ private:
     uint8_t heater_duty_cycle;
 
     uint32_t last_servo_out_us;
+
+    uint32_t dshot_telem_mask;
 
     bool corked;
     bool do_shutdown;
