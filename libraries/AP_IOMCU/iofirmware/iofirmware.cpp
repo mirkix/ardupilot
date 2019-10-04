@@ -139,8 +139,6 @@ void setup(void)
         hal.rcout->enable_ch(i);
     }
 
-//    hal.rcout->set_output_mode(17, AP_HAL::RCOutput::MODE_PWM_DSHOT150);
-
     iomcu.init();
 
     iomcu.calculate_fw_crc();
@@ -535,6 +533,10 @@ bool AP_IOMCU_FW::handle_code_write()
             mode_out.mask = rx_io_packet.regs[0];
             mode_out.mode = rx_io_packet.regs[1];
             hal.rcout->set_output_mode(rx_io_packet.regs[0], (AP_HAL::RCOutput::output_mode)rx_io_packet.regs[1]);
+            break;
+
+        case PAGE_REG_SETUP_DSHOT_TLM:
+            hal.rcout->set_telem_request_mask(rx_io_packet.regs[0]);
             break;
 
         case PAGE_REG_SETUP_HEATER_DUTY_CYCLE:
