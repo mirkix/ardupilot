@@ -318,13 +318,6 @@ void Rover::one_second_loop(void)
 void Rover::update_GPS(void)
 {
     gps.update();
-    if (gps.last_message_time_ms() != last_gps_msg_ms) {
-        last_gps_msg_ms = gps.last_message_time_ms();
-
-#if CAMERA == ENABLED
-        camera.update();
-#endif
-    }
 }
 
 void Rover::update_current_mode(void)
