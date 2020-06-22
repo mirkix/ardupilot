@@ -49,7 +49,7 @@ const AP_Param::GroupInfo AP_Camera::var_info[] = {
 
     // @Param: TRIGG_DIST
     // @DisplayName: Camera trigger distance
-    // @Description: Distance in meters between camera triggers. If this value is non-zero then the camera will trigger whenever the GPS position changes by this number of meters regardless of what mode the APM is in. Note that this parameter can also be set in an auto mission using the DO_SET_CAM_TRIGG_DIST command, allowing you to enable/disable the triggering of the camera during the flight.
+    // @Description: Distance in meters between camera triggers. If this value is non-zero then the camera will trigger whenever the position changes by this number of meters regardless of what mode the APM is in. Note that this parameter can also be set in an auto mission using the DO_SET_CAM_TRIGG_DIST command, allowing you to enable/disable the triggering of the camera during the flight.
     // @User: Standard
     // @Units: m
     // @Range: 0 1000
@@ -476,8 +476,10 @@ void AP_Camera::take_picture()
  */
 void AP_Camera::update_trigger()
 {
+    update();
+
     trigger_pic_cleanup();
-    
+
     if (_camera_trigger_logged != _camera_trigger_count) {
         uint32_t timestamp32 = _feedback_timestamp_us;
         _camera_trigger_logged = _camera_trigger_count;
@@ -505,7 +507,7 @@ AP_Camera::CamTrigType AP_Camera::get_trigger_type(void)
             return (CamTrigType)type;
         default:
             return CamTrigType::servo;
-    }   
+    }
 }
 
 // singleton instance
