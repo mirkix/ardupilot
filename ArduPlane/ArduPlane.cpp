@@ -1,6 +1,6 @@
 /*
    Lead developer: Andrew Tridgell
- 
+
    Authors:    Doug Weibel, Jose Julio, Jordi Munoz, Jason Short, Randy Mackay, Pat Hickey, John Arne Birkeland, Olivier Adler, Amilcar Lucas, Gregory Fletcher, Paul Riseborough, Brandon Jones, Jon Challinger, Tom Pittenger
    Thanks to:  Chris Anderson, Michael Oborne, Paul Mather, Bill Premerlani, James Cohen, JB from rotorFX, Automatik, Fefenin, Peter Meister, Remzibi, Yury Smirnov, Sandro Benigno, Max Levine, Roberto Navoni, Lorenz Meier, Yury MonZon
 
@@ -221,7 +221,7 @@ void Plane::update_logging2(void)
         write_notch_log_messages();
 #endif
     }
-    
+
     if (should_log(MASK_LOG_NTUN)) {
         Log_Write_Nav_Tuning();
         Log_Write_Guided();
@@ -291,7 +291,7 @@ void Plane::one_second_loop()
         gps.status() >= AP_GPS::GPS_OK_FIX_3D) {
             last_home_update_ms = gps.last_message_time_ms();
             update_home();
-            
+
             // reset the landing altitude correction
             landing.alt_offset = 0;
     }
@@ -325,9 +325,9 @@ void Plane::airspeed_ratio_update(void)
         gps.status() < AP_GPS::GPS_OK_FIX_3D ||
         gps.ground_speed() < 4) {
         // don't calibrate when not moving
-        return;        
+        return;
     }
-    if (airspeed.get_airspeed() < aparm.airspeed_min && 
+    if (airspeed.get_airspeed() < aparm.airspeed_min &&
         gps.ground_speed() < (uint32_t)aparm.airspeed_min) {
         // don't calibrate when flying below the minimum airspeed. We
         // check both airspeed and ground speed to catch cases where
@@ -391,10 +391,6 @@ void Plane::update_GPS_10Hz(void)
         // see if we've breached the geo-fence
         geofence_check(false);
 
-#if CAMERA == ENABLED
-        camera.update();
-#endif
-
         // update wind estimate
         ahrs.estimate_wind();
     } else if (gps.status() < AP_GPS::GPS_OK_FIX_3D && ground_start_count != 0) {
@@ -445,14 +441,14 @@ void Plane::update_navigation()
     if (qrtl_radius == 0) {
         qrtl_radius = abs(aparm.loiter_radius);
     }
-    
+
     switch (control_mode->mode_number()) {
     case Mode::Number::AUTO:
         if (ahrs.home_is_set()) {
             mission.update();
         }
         break;
-            
+
     case Mode::Number::RTL:
         if (quadplane.available() && quadplane.rtl_mode == 1 &&
             (nav_controller->reached_loiter_target() ||
@@ -468,7 +464,7 @@ void Plane::update_navigation()
             break;
         } else if (g.rtl_autoland == 1 &&
             !auto_state.checked_for_autoland &&
-            reached_loiter_target() && 
+            reached_loiter_target() &&
             labs(altitude_error_cm) < 1000) {
             // we've reached the RTL point, see if we have a landing sequence
             if (mission.jump_to_landing_sequence()) {
@@ -569,7 +565,7 @@ void Plane::update_alt()
     } else if (gps.status() >= AP_GPS::GPS_OK_FIX_3D && gps.have_vertical_velocity()) {
         sink_rate = gps.velocity().z;
     } else {
-        sink_rate = -barometer.get_climb_rate();        
+        sink_rate = -barometer.get_climb_rate();
     }
 
     // low pass the sink rate to take some of the noise out
@@ -581,7 +577,7 @@ void Plane::update_alt()
 
     update_flight_stage();
 
-    if (auto_throttle_mode && !throttle_suppressed) {        
+    if (auto_throttle_mode && !throttle_suppressed) {
 
         float distance_beyond_land_wp = 0;
         if (flight_stage == AP_Vehicle::FixedWing::FLIGHT_LAND && current_loc.past_interval_finish_line(prev_WP_loc, next_WP_loc)) {
@@ -614,7 +610,7 @@ void Plane::update_alt()
 void Plane::update_flight_stage(void)
 {
     // Update the speed & height controller states
-    if (auto_throttle_mode && !throttle_suppressed) {        
+    if (auto_throttle_mode && !throttle_suppressed) {
         if (control_mode == &mode_auto) {
             if (quadplane.in_vtol_auto()) {
                 set_flight_stage(AP_Vehicle::FixedWing::FLIGHT_VTOL);
