@@ -185,6 +185,10 @@ bool Plane::start_command(const AP_Mission::Mission_Command& cmd)
                                             cmd.content.do_engine_control.height_delay_cm*0.01f);
         break;
 
+    case MAV_CMD_DO_SET_MODE:
+        set_mode(cmd.p1, ModeReason::SCRIPTING);
+        break;
+
     default:
         // unable to use the command, allow the vehicle to try the next command
         return false;
