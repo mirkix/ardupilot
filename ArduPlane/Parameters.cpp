@@ -36,6 +36,23 @@ const AP_Param::Info Plane::var_info[] = {
     // @Path: ../libraries/AP_SerialManager/AP_SerialManager.cpp
     GOBJECT(serial_manager, "SERIAL",   AP_SerialManager),
 
+     // @Param: LANDN_RATE
+    // @DisplayName: Pitch angle rate
+    // @Description: Pitch angle rate to reach target angle
+    // @Units: deg/s
+    // @Range: -100 -10
+    // @Increment: 1
+    // @User: Standard
+    GSCALAR(landn_rate, "LANDN_RATE", -20),
+
+    // @Param: LANDN_TARGET_CD
+    // @DisplayName: Target angle
+    // @Description: Target angle for LANDN mode.
+    // @Units: cdeg
+    // @Range: -8900 -1000
+    // @User: Advanced
+    GSCALAR(landn_target_cd, "LANDN_TARGET_CD",  -4500),
+
     // @Param: AUTOTUNE_LEVEL
     // @DisplayName: Autotune level
     // @Description: Level of aggressiveness of pitch and roll PID gains. Lower values result in a 'softer' tune. Level 6 recommended for most planes. A value of 0 means to keep the current values of RMAX and TCONST for the controllers, tuning only the PID values

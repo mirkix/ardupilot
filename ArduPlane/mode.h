@@ -43,6 +43,7 @@ public:
         QAUTOTUNE     = 22,
         QACRO         = 23,
         THERMAL       = 24,
+        LANDN         = 25,
     };
 
     // Constructor
@@ -640,3 +641,19 @@ protected:
 };
 
 #endif
+
+class ModeLandn: public Mode
+{
+public:
+
+    Number mode_number() const override { return Number::LANDN; }
+    const char *name() const override { return "LANDN"; }
+    const char *name4() const override { return "LNDN"; }
+
+    // methods that affect movement of the vehicle in this mode
+    void update() override;
+
+protected:
+
+     bool _enter() override;
+};

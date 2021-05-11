@@ -164,6 +164,7 @@ public:
     friend class ModeQAutotune;
     friend class ModeTakeoff;
     friend class ModeThermal;
+    friend class ModeLandn;
 
     Plane(void);
 
@@ -293,6 +294,7 @@ private:
 #if HAL_SOARING_ENABLED
     ModeThermal mode_thermal;
 #endif
+    ModeLandn mode_landn;
 
     // This is the state of the flight control system
     // There are multiple states defined such as MANUAL, FBW-A, AUTO
@@ -409,6 +411,14 @@ private:
         float locked_roll_err;
         int32_t locked_pitch_cd;
     } acro_state;
+
+    // LANDN controller state
+     struct {
+        bool locked_roll;
+        bool locked_pitch;
+        float locked_roll_err;
+        int32_t locked_pitch_cd;
+    } landn_state;
 
     struct {
         uint32_t last_tkoff_arm_time;
@@ -850,6 +860,7 @@ private:
     void stabilize_yaw(float speed_scaler);
     void stabilize_training(float speed_scaler);
     void stabilize_acro(float speed_scaler);
+    void stabilize_landn(float speed_scaler);
     void calc_nav_yaw_coordinated(float speed_scaler);
     void calc_nav_yaw_course(void);
     void calc_nav_yaw_ground(void);
