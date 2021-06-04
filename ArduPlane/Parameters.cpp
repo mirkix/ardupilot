@@ -40,7 +40,7 @@ const AP_Param::Info Plane::var_info[] = {
     // @DisplayName: Pitch angle rate
     // @Description: Pitch angle rate to reach target angle
     // @Units: deg/s
-    // @Range: -100 -10
+    // @Range: -270 -10
     // @Increment: 1
     // @User: Standard
     GSCALAR(landn_rate, "LANDN_RATE", -20),
