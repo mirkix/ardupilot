@@ -208,6 +208,10 @@ public:
     /// return the crosstrack_error - horizontal error of the actual position vs the desired position
     float crosstrack_error() const { return _pos_control.crosstrack_error();}
 
+    float get_altitude_offset() const { return _altitude_offset_cm; }
+
+    void set_altitude_offset(float altitude_offset_cm) { _altitude_offset_cm = altitude_offset_cm; }
+
     static const struct AP_Param::GroupInfo var_info[];
 
 protected:
@@ -275,4 +279,5 @@ protected:
     AP_Int8     _rangefinder_use;       // parameter that specifies if the range finder should be used for terrain following commands
     bool        _rangefinder_healthy;   // true if rangefinder distance is healthy (i.e. between min and maximum)
     float       _rangefinder_alt_cm;    // latest distance from the rangefinder
+    float       _altitude_offset_cm;    // altitude offset in cm
 };

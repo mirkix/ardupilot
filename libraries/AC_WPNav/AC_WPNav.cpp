@@ -147,7 +147,9 @@ AC_WPNav::TerrainSource AC_WPNav::get_terrain_source() const
 ///     should be called once before the waypoint controller is used but does not need to be called before subsequent updates to destination
 void AC_WPNav::wp_and_spline_init(float speed_cms, Vector3f stopping_point)
 {
-    
+    // initialize altitude offset
+    _altitude_offset_cm = 0.0f;
+
     // sanity check parameters
     // check _wp_accel_cmss is reasonable
     _scurve_accel_corner = angle_to_accel(_pos_control.get_lean_angle_max_cd() * 0.01) * 100;
@@ -317,6 +319,9 @@ bool AC_WPNav::set_wp_destination(const Vector3f& destination, bool terrain_alt)
             return false;
         }
 
+        // unset altitude offset
+        _origin.z -= _altitude_offset_cm;
+
         // convert origin to alt-above-terrain if necessary
         if (terrain_alt) {
             // new destination is alt-above-terrain, previous destination was alt-above-ekf-origin
@@ -457,6 +462,10 @@ bool AC_WPNav::advance_wp_target_along_track(float dt)
     if (_terrain_alt && !get_terrain_offset(terr_offset)) {
         return false;
     }
+
+   // set altitude offset
+   terr_offset += _altitude_offset_cm;
+
     const float offset_z_scaler = _pos_control.pos_offset_z_scaler(terr_offset, get_terrain_margin() * 100.0);
 
     // input shape the terrain offset
@@ -742,6 +751,9 @@ bool AC_WPNav::set_spline_destination(const Vector3f& destination, bool terrain_
         if (!get_terrain_offset(origin_terr_offset)) {
             return false;
         }
+
+        // unset altitude offset
+        _origin.z -= _altitude_offset_cm;
 
         // convert origin to alt-above-terrain if necessary
         if (terrain_alt) {
