@@ -966,6 +966,11 @@ void ModeAuto::wp_run()
         }
     }
 
+    // get pilot desired climb rate
+    float target_climb_rate = get_pilot_desired_climb_rate(channel_throttle->get_control_in());
+    target_climb_rate = constrain_float(target_climb_rate, -get_pilot_speed_dn(), g.pilot_speed_up);
+    wp_nav->set_altitude_offset(wp_nav->get_altitude_offset() + target_climb_rate * G_Dt);
+
     // if not armed set throttle to zero and exit immediately
     if (is_disarmed_or_landed()) {
         make_safe_ground_handling();
