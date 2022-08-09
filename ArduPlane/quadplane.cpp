@@ -2357,7 +2357,8 @@ void QuadPlane::vtol_position_controller(void)
         plane.nav_controller->update_waypoint(plane.current_loc, loc);
 
         // use TECS for throttle
-        SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, plane.TECS_controller.get_throttle_demand());
+        SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, 0.0);
+//        SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, plane.TECS_controller.get_throttle_demand());
 
         // use TECS for pitch
         int32_t commanded_pitch = plane.TECS_controller.get_pitch_demand();
@@ -2610,6 +2611,12 @@ void QuadPlane::vtol_position_controller(void)
         plane.nav_pitch_cd = pos_control->get_pitch_cd();
 
         if (transition->set_VTOL_roll_pitch_limit(plane.nav_roll_cd, plane.nav_pitch_cd)) {
+            pos_control->set_externally_limited_xy();
+        }
+
+        // no negative pitch more then -400.0
+        if (plane.nav_pitch_cd < -400.0) {
+            plane.nav_pitch_cd = -400.0;
             pos_control->set_externally_limited_xy();
         }
 
@@ -4143,6 +4150,10 @@ bool SLT_Transition::set_VTOL_roll_pitch_limit(int32_t& roll_cd, int32_t& pitch_
 
     if (quadplane.back_trans_pitch_limit_ms <= 0) {
         // time based pitch envelope disabled
+        if (pitch_cd > angle_max) {
+            pitch_cd = angle_max;
+            ret = true;
+        }
         return ret;
     }
 
@@ -4152,6 +4163,11 @@ bool SLT_Transition::set_VTOL_roll_pitch_limit(int32_t& roll_cd, int32_t& pitch_
     if (last_fw_mode_ms == 0 || dt > limit_time_ms) {
         // we are beyond the time limit, don't apply envelope
         last_fw_mode_ms = 0;
+        if (pitch_cd > angle_max) {
+            pitch_cd = angle_max;
+            ret = true;
+        }
+
         return ret;
     }
 
