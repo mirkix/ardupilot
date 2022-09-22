@@ -151,8 +151,17 @@ AP_SBusOut::update()
         }
         channels[i] = c->get_output_pwm();
     }
+
+    /* mapping for GT33REU RANGE EXTENDER */
+    channels[4] = SRV_Channels::srv_channel(10)->get_output_pwm();
+    channels[15] = SRV_Channels::srv_channel(11)->get_output_pwm();
+    channels[8] = SRV_Channels::srv_channel(12)->get_output_pwm();
+
     uint8_t buffer[SBUS_BSIZE];
     sbus_format_frame(channels, nchan, buffer);
+
+    /* SBUS2 */
+    buffer[24] = 0x03;
 
 #if SBUS_DEBUG
     hal.gpio->pinMode(55, HAL_GPIO_OUTPUT);
