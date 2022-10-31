@@ -45,7 +45,7 @@ function show_frame(dnum, frame)
     end
 
     if div < 2 then
-        gcs:send_text(6,string.format("T1: %d C°,C2: %d A,Pwr: %d W,RPM: %d,Fuel: %d %", temp1, current2, power, rpm, fuel))
+        gcs:send_text(6,string.format("T1: %d C°,C2: %d A,Pwr: %d W,RPM: %d, Fuel: %d", temp1, current2, power, rpm, fuel))
         div = 1000
     else
         div = div - 1
