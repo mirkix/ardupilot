@@ -137,6 +137,8 @@ public:
     bool thr_ctrl_land;
 
     uint16_t get_pilot_velocity_z_max_dn() const;
+
+    float get_vel_target_z_cms() const;
     
     struct PACKED log_QControl_Tuning {
         LOG_PACKET_HEADER;

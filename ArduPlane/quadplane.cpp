@@ -3931,6 +3931,11 @@ uint16_t QuadPlane::get_pilot_velocity_z_max_dn() const
     return abs(pilot_velocity_z_max_dn);
 }
 
+float QuadPlane::get_vel_target_z_cms() const
+{
+    return pos_control->get_vel_target_z_cms();
+}
+
 /*
   should we use the fixed wing attitude controllers for roll/pitch control
  */
