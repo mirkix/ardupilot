@@ -3398,6 +3398,10 @@ void QuadPlane::Log_Write_QControl_Tuning()
     pos_control->write_log();
 }
 
+void QuadPlane::set_boost_pct(float boost)
+{
+    boost_pct = boost;
+}
 
 /*
   calculate the forward throttle percentage. The forward throttle can
@@ -3512,14 +3516,14 @@ float QuadPlane::forward_throttle_pct()
         float alt_cutoff = MAX(0,vel_forward_alt_cutoff);
         float height_above_ground = plane.relative_ground_altitude(plane.g.rangefinder_landing);
 
-        vel_forward.last_pct = linear_interpolate(0, vel_forward.integrator,
-                                                  height_above_ground, alt_cutoff, alt_cutoff+2);
+        float integrator_and_boost = constrain_float(vel_forward.integrator + boost_pct, fwd_throttle_min, 100.0);
+        vel_forward.last_pct = linear_interpolate(0, integrator_and_boost, height_above_ground, alt_cutoff, alt_cutoff+2);
+//printf("3 = %f \n", vel_forward.last_pct);
     }
     if (is_zero(vel_forward.last_pct)) {
         // if the percent is 0 then decay the integrator
         vel_forward.integrator *= 0.95f;
     }
-
     return vel_forward.last_pct;
 }
 

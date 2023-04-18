@@ -139,7 +139,9 @@ public:
     uint16_t get_pilot_velocity_z_max_dn() const;
 
     float get_vel_target_z_cms() const;
-    
+
+    void set_boost_pct(float boost);
+
     struct PACKED log_QControl_Tuning {
         LOG_PACKET_HEADER;
         uint64_t time_us;
@@ -200,6 +202,8 @@ private:
 
     // air mode state: OFF, ON, ASSISTED_FLIGHT_ONLY
     AirMode air_mode;
+
+    float boost_pct;
 
     // Command model parameter class
     // Default max rate, default expo, default time constant
