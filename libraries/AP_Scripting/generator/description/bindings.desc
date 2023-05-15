@@ -250,6 +250,7 @@ singleton AP_SerialLED method send void uint8_t 1 16
 
 include SRV_Channel/SRV_Channel.h
 singleton SRV_Channels rename SRV_Channels
+singleton SRV_Channels method channel_function SRV_Channel::Aux_servo_function_t'enum uint8_t 0 UINT8_MAX
 singleton SRV_Channels method find_channel boolean SRV_Channel::Aux_servo_function_t'enum SRV_Channel::k_none SRV_Channel::k_nr_aux_servo_functions-1 uint8_t'Null
 singleton SRV_Channels method set_output_pwm void SRV_Channel::Aux_servo_function_t'enum SRV_Channel::k_none SRV_Channel::k_nr_aux_servo_functions-1 uint16_t 0 UINT16_MAX
 singleton SRV_Channels method set_output_pwm_chan void uint8_t 0 NUM_SERVO_CHANNELS-1 uint16_t 0 UINT16_MAX
@@ -386,6 +387,7 @@ singleton QuadPlane rename quadplane
 singleton QuadPlane depends APM_BUILD_TYPE(APM_BUILD_ArduPlane) && HAL_QUADPLANE_ENABLED
 singleton QuadPlane method in_vtol_mode boolean
 singleton QuadPlane method in_assisted_flight boolean
+singleton QuadPlane method in_transition boolean
 singleton QuadPlane method get_vel_target_z_cms float
 singleton QuadPlane method set_boost_pct void float'skip_check
 
