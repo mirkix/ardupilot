@@ -4269,12 +4269,12 @@ void SLT_Transition::set_FW_roll_pitch(int32_t& nav_pitch_cd, int32_t& nav_roll_
 
     float max_pitch;
     if (transition_state < TRANSITION_TIMER) {
-        if (plane.ahrs.groundspeed() < 3.0) {
+ //       if (plane.ahrs.groundspeed() < 3.0) {
             // until we have some ground speed limit to zero pitch
-            max_pitch = 0.0;
-        } else {
+ //           max_pitch = 0.0;
+ //       } else {
             max_pitch = quadplane.transition_pitch_max;
-        }
+//      }
     } else {
         max_pitch = (quadplane.transition_pitch_max+1.0)*2.0;
     }
