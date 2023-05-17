@@ -1,5 +1,5 @@
-local THR_SERVO_1 = 8 -- SERVO7
-local THR_SERVO_2 = 9 -- SERVO8
+local THR_SERVO_1 = 6 -- SERVO7
+local THR_SERVO_2 = 7 -- SERVO8
 local THR_SERVO = 70
 
 local PARAM_TABLE_KEY = 25
