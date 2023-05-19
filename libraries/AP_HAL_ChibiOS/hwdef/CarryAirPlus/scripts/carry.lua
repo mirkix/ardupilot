@@ -48,7 +48,7 @@ else
 end
 
 function transition_throttle()
-    if vehicle:get_likely_flying() and quadplane:in_transition() and CA_TRA_THR_PCT:get() > 0.1 then
+    if vehicle:get_likely_flying() and quadplane:in_transition() and (CA_TRA_THR_PCT:get() > 0.1) and (vehicle:get_mode() ~= 21) then
         local pwm_value = math.floor(1000 + (CA_TRA_THR_PCT:get() * 10.0))
         if (SRV_Channels:channel_function(THR_SERVO_1) == THR_SERVO) and (SRV_Channels:channel_function(THR_SERVO_2) == THR_SERVO) then
             SRV_Channels:set_output_pwm_chan_timeout(THR_SERVO_1, pwm_value, 600)
