@@ -1,7 +1,13 @@
-local scr_user1_param = Parameter()
-assert(scr_user1_param:init('SCR_USER1'), 'could not find SCR_USER1 parameter')
 
-if scr_user1_param:get() == 0 then
+local PARAM_TABLE_KEY = 27
+assert(param:add_table(PARAM_TABLE_KEY, "GT33_", 10), 'could not add param table')
+
+assert(param:add_param(PARAM_TABLE_KEY, 1,  'ENABLE', 0.0), 'could not add ENABLE')
+
+local GT33_ENABLE = Parameter()
+GT33_ENABLE:init('GT33_ENABLE')
+
+if GT33_ENABLE:get() == 0 then
     gcs:send_text(6,"GT33REU LUA script disabled")
     return
 end
