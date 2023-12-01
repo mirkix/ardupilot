@@ -16,7 +16,7 @@
 #if AP_BARO_ICP201XX_ENABLED
 
 #include <AP_HAL/AP_HAL.h>
-#include <AP_HAL/I2CDevice.h>
+#include <AP_HAL/Device.h>
 #include <utility>
 
 #include <AP_Common/AP_Common.h>
@@ -75,14 +75,14 @@ extern const AP_HAL::HAL &hal;
 /*
   constructor
  */
-AP_Baro_ICP201XX::AP_Baro_ICP201XX(AP_Baro &baro, AP_HAL::OwnPtr<AP_HAL::I2CDevice> _dev)
+AP_Baro_ICP201XX::AP_Baro_ICP201XX(AP_Baro &baro, AP_HAL::OwnPtr<AP_HAL::Device> _dev)
     : AP_Baro_Backend(baro)
     , dev(std::move(_dev))
 {
 }
 
 AP_Baro_Backend *AP_Baro_ICP201XX::probe(AP_Baro &baro,
-                                         AP_HAL::OwnPtr<AP_HAL::I2CDevice> dev)
+                                         AP_HAL::OwnPtr<AP_HAL::Device> dev)
 {
     if (!dev) {
         return nullptr;
@@ -161,9 +161,23 @@ void AP_Baro_ICP201XX::dummy_reg()
 bool AP_Baro_ICP201XX::read_reg(uint8_t reg, uint8_t *buf, uint8_t len)
 {
     bool ret;
-    ret = dev->transfer(&reg, 1, buf, len);
-    dummy_reg();
-    return ret;
+
+    if (dev->bus_type() != AP_HAL::Device::BUS_TYPE_SPI) {
+        ret = dev->transfer(&reg, 1, buf, len);
+        dummy_reg();
+        return ret;
+    } else {
+        uint8_t b[len+2];
+        b[0] = 0x3c;
+        b[1] = reg;
+        memset(&b[2], 0, len);
+        if (!dev->transfer(b, len+2, b, len+2)) {
+            return false;
+        }
+        memcpy(buf, &b[2], len);
+        dummy_reg();
+        return true;
+    }
 }
 
 bool AP_Baro_ICP201XX::read_reg(uint8_t reg, uint8_t *val)
@@ -174,10 +188,16 @@ bool AP_Baro_ICP201XX::read_reg(uint8_t reg, uint8_t *val)
 bool AP_Baro_ICP201XX::write_reg(uint8_t reg, uint8_t val)
 {
     bool ret;
-    uint8_t data[2] = { reg, val };
-    ret = dev->transfer(data, sizeof(data), nullptr, 0);
-    dummy_reg();
-    return ret;
+    if (dev->bus_type() != AP_HAL::Device::BUS_TYPE_SPI) {
+        uint8_t data[2] = { reg, val };
+        ret = dev->transfer(data, sizeof(data), nullptr, 0);
+        dummy_reg();
+    } else {
+        uint8_t data[3] = {0x33, reg, val};
+        ret = dev->transfer(data, sizeof(data), nullptr, 0);
+        dummy_reg();
+    }
+    return ret;    
 }
 
 void AP_Baro_ICP201XX::soft_reset()
