@@ -1,0 +1,58 @@
+# hw definition file for processing by chibios_hwdef.py
+# UAV-DEV GmbH HAT for RPI
+
+# MCU class and specific type
+MCU STM32H7xx STM32H743xx
+
+# crystal frequency
+OSCILLATOR_HZ 24000000
+
+# board ID for firmware load
+APJ_BOARD_ID 5220
+
+# the nucleo seems to have trouble with flashing the last sector?
+FLASH_SIZE_KB 2048
+
+# the location where the bootloader will put the firmware
+FLASH_BOOTLOADER_LOAD_KB 128
+
+# bootloader is installed at zero offset
+FLASH_RESERVE_START_KB 0
+
+# order of UARTs (and USB)
+SERIAL_ORDER OTG1
+
+#LED setup
+PI4 LED_BOOTLOADER OUTPUT LOW
+PK5 LED_ACTIVITY OUTPUT LOW
+define HAL_LED_ON 1
+
+PA11 OTG_FS_DM OTG1
+PA12 OTG_FS_DP OTG1
+
+PA13 JTMS-SWDIO SWD
+PA14 JTCK-SWCLK SWD
+
+# QUADSPI
+PF8 QUADSPI_BK1_IO0 QUADSPI1
+PF9  QUADSPI_BK1_IO1 QUADSPI1
+PF7  QUADSPI_BK1_IO2 QUADSPI1
+PF6  QUADSPI_BK1_IO3 QUADSPI1
+PG6  QUADSPI_BK1_NCS QUADSPI1
+PF10 QUADSPI_CLK     QUADSPI1
+
+EXT_FLASH_SIZE_MB 32
+INT_FLASH_PRIMARY 1
+
+# IFace     Device Name     Bus         QSPI Mode     Clk Freq  Size (Pow2)  NCS Delay
+QSPIDEV     w25q            QUADSPI1    MODE1         100*MHZ   31           4
+
+# Add CS pins to ensure they are high in bootloader
+PA3 ICM4288_CS CS # CS1
+
+PJ3 BMI088_G_CS CS # CS1
+PJ4 BMI088_A_CS CS # CS2
+
+PD9 DPS310_CS CS   # CS1
+
+PF2 ICP20100_CS CS  # CS1
