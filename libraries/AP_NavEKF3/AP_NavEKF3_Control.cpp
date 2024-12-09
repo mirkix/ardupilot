@@ -286,9 +286,9 @@ void NavEKF3_core::setAidingMode()
             // and IMU gyro bias estimates have stabilised
             // If GPS usage has been prohiited then we use flow aiding provided optical flow data is present
             // GPS aiding is the preferred option unless excluded by the user
-            if (readyToUseGPS() || readyToUseRangeBeacon() || readyToUseExtNav()) {
+            if (readyToUseGPS() || readyToUseRangeBeacon() /*|| readyToUseExtNav()*/) {
                 PV_AidingMode = AID_ABSOLUTE;
-            } else if (readyToUseOptFlow() || readyToUseBodyOdm()) {
+            } else if (readyToUseOptFlow() || readyToUseBodyOdm() || readyToUseExtNav()) {
                 PV_AidingMode = AID_RELATIVE;
             }
             break;
@@ -300,10 +300,10 @@ void NavEKF3_core::setAidingMode()
             bool bodyOdmFusionTimeout = ((imuSampleTime_ms - prevBodyVelFuseTime_ms) > 5000);
             // Enable switch to absolute position mode if GPS or range beacon data is available
             // If GPS or range beacons data is not available and flow fusion has timed out, then fall-back to no-aiding
-            if (readyToUseGPS() || readyToUseRangeBeacon() || readyToUseExtNav()) {
-                PV_AidingMode = AID_ABSOLUTE;
+            if (readyToUseGPS() || readyToUseRangeBeacon() /*|| readyToUseExtNav()*/) {
+//                PV_AidingMode = AID_ABSOLUTE;
             } else if (flowFusionTimeout && bodyOdmFusionTimeout) {
-                PV_AidingMode = AID_NONE;
+//                PV_AidingMode = AID_NONE;
             }
             break;
         }
@@ -547,7 +547,7 @@ bool NavEKF3_core::readyToUseBodyOdm(void) const
     }
 
     // Check for fresh visual odometry data that meets the accuracy required for alignment
-    bool visoDataGood = (imuSampleTime_ms - bodyOdmMeasTime_ms < 200) && (bodyOdmDataNew.velErr < 1.0f);
+    bool visoDataGood = (imuSampleTime_ms - bodyOdmMeasTime_ms < 200); //&& (bodyOdmDataNew.velErr < 1.0f);
 
     // Check for fresh wheel encoder data
     bool wencDataGood = (imuDataDelayed.time_ms - wheelOdmDataDelayed.time_ms < 200);
@@ -590,11 +590,11 @@ bool NavEKF3_core::readyToUseRangeBeacon(void) const
 bool NavEKF3_core::readyToUseExtNav(void) const
 {
 #if EK3_FEATURE_EXTERNAL_NAV
-    if (frontend->sources.getPosXYSource() != AP_NavEKF_Source::SourceXY::EXTNAV) {
-        return false;
-    }
+//    if (frontend->sources.getPosXYSource() != AP_NavEKF_Source::SourceXY::EXTNAV) {
+//        return false;
+//    }
 
-    return tiltAlignComplete && extNavDataToFuse;
+    return tiltAlignComplete; // && extNavDataToFuse;
 #else
     return false;
 #endif // EK3_FEATURE_EXTERNAL_NAV
