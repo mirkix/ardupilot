@@ -864,6 +864,12 @@ private:
     // return true if the filter to be ready to use external nav data
     bool readyToUseExtNav(void) const;
 
+    // return true if the filter to be ready to use external nav pos data
+    bool readyToUseExtNavPos(void) const;
+
+    // return true if the filter to be ready to use external nav vel data
+    bool readyToUseExtNavVel(void) const;
+
     // return true if we should use the range finder sensor
     bool useRngFinder(void) const;
 
