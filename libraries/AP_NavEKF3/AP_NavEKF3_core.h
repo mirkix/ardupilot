@@ -862,7 +862,7 @@ private:
     bool readyToUseBodyOdm(void) const;
 
     // return true if the filter to be ready to use external nav data
-    bool readyToUseExtNav(void) const;
+    // bool readyToUseExtNav(void) const;
 
     // return true if the filter to be ready to use external nav pos data
     bool readyToUseExtNavPos(void) const;

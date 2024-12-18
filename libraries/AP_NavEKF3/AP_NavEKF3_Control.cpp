@@ -302,7 +302,7 @@ void NavEKF3_core::setAidingMode()
             // If GPS or range beacons data is not available and flow fusion has timed out, then fall-back to no-aiding
             if (readyToUseGPS() || readyToUseRangeBeacon() || readyToUseExtNavPos()) {
                 PV_AidingMode = AID_ABSOLUTE;
-            } else if (flowFusionTimeout && bodyOdmFusionTimeout) {
+            } else if (flowFusionTimeout && bodyOdmFusionTimeout && (!true)) { // (!readyToUseExtNavVel())) {
                 PV_AidingMode = AID_NONE;
             }
             break;
@@ -450,7 +450,7 @@ void NavEKF3_core::setAidingMode()
                 GCS_SEND_TEXT(MAV_SEVERITY_INFO, "EKF3 IMU%u initial beacon pos D offset = %3.1f (m)",(unsigned)imu_index,(double)rngBcn.posOffsetNED.z);
 #endif  // EK3_FEATURE_BEACON_FUSION
 #if EK3_FEATURE_EXTERNAL_NAV
-            } else if (readyToUseExtNav()) {
+            } else if (readyToUseExtNavPos()) {
                 // we are commencing aiding using external nav
                 posResetSource = resetDataSource::EXTNAV;
                 GCS_SEND_TEXT(MAV_SEVERITY_INFO, "EKF3 IMU%u is using external nav data",(unsigned)imu_index);
@@ -587,18 +587,18 @@ bool NavEKF3_core::readyToUseRangeBeacon(void) const
 }
 
 // return true if the filter is ready to use external nav data
-bool NavEKF3_core::readyToUseExtNav(void) const
-{
-#if EK3_FEATURE_EXTERNAL_NAV
-//    if (frontend->sources.getPosXYSource() != AP_NavEKF_Source::SourceXY::EXTNAV) {
-//        return false;
-//    }
+// bool NavEKF3_core::readyToUseExtNav(void) const
+// {
+// #if EK3_FEATURE_EXTERNAL_NAV
+//     if (frontend->sources.getPosXYSource() != AP_NavEKF_Source::SourceXY::EXTNAV) {
+//         return false;
+//     }
 
-    return tiltAlignComplete; // && extNavDataToFuse;
-#else
-    return false;
-#endif // EK3_FEATURE_EXTERNAL_NAV
-}
+//     return tiltAlignComplete && extNavDataToFuse;
+// #else
+//     return false;
+// #endif // EK3_FEATURE_EXTERNAL_NAV
+// }
 
 // return true if the filter is ready to use external nav pos data
 bool NavEKF3_core::readyToUseExtNavPos(void) const
