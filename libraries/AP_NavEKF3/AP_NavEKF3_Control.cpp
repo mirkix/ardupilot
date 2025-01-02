@@ -298,11 +298,14 @@ void NavEKF3_core::setAidingMode()
             bool flowFusionTimeout = ((imuSampleTime_ms - prevFlowFuseTime_ms) > 5000);
             // Check if the fusion has timed out (body odometry measurements have been rejected for too long)
             bool bodyOdmFusionTimeout = ((imuSampleTime_ms - prevBodyVelFuseTime_ms) > 5000);
+            // Check if the fusion has timed out (velocity measurements have been rejected for too long)
+            bool velNavFusionTimeout = ((imuSampleTime_ms - lastVelPassTime_ms) > 5000);
+
             // Enable switch to absolute position mode if GPS or range beacon data is available
             // If GPS or range beacons data is not available and flow fusion has timed out, then fall-back to no-aiding
             if (readyToUseGPS() || readyToUseRangeBeacon() || readyToUseExtNavPos()) {
                 PV_AidingMode = AID_ABSOLUTE;
-            } else if (flowFusionTimeout && bodyOdmFusionTimeout && (!true)) { // (!readyToUseExtNavVel())) {
+            } else if (flowFusionTimeout && bodyOdmFusionTimeout && velNavFusionTimeout) {
                 PV_AidingMode = AID_NONE;
             }
             break;
@@ -547,7 +550,7 @@ bool NavEKF3_core::readyToUseBodyOdm(void) const
     }
 
     // Check for fresh visual odometry data that meets the accuracy required for alignment
-    bool visoDataGood = (imuSampleTime_ms - bodyOdmMeasTime_ms < 200); //&& (bodyOdmDataNew.velErr < 1.0f);
+    bool visoDataGood = (imuSampleTime_ms - bodyOdmMeasTime_ms < 200) && (bodyOdmDataNew.velErr < 1.0f);
 
     // Check for fresh wheel encoder data
     bool wencDataGood = (imuDataDelayed.time_ms - wheelOdmDataDelayed.time_ms < 200);
@@ -753,6 +756,7 @@ void  NavEKF3_core::updateFilterStatus(void)
     nav_filter_status status;
     status.value = 0;
     bool doingBodyVelNav = (PV_AidingMode != AID_NONE) && (imuSampleTime_ms - prevBodyVelFuseTime_ms < 5000);
+    bool doingVelNav = (PV_AidingMode != AID_NONE) && ((imuSampleTime_ms - lastVelPassTime_ms) < 5000);
     bool doingFlowNav = (PV_AidingMode != AID_NONE) && flowDataValid;
     bool doingWindRelNav = (!tasTimeout && assume_zero_sideslip()) || !dragTimeout;
     bool doingNormalGpsNav = !posTimeout && (PV_AidingMode == AID_ABSOLUTE);
@@ -767,7 +771,7 @@ void  NavEKF3_core::updateFilterStatus(void)
     status.flags.attitude = !stateStruct.quat.is_nan() && filterHealthy;   // attitude valid (we need a better check)
     status.flags.horiz_vel = someHorizRefData && filterHealthy;      // horizontal velocity estimate valid
     status.flags.vert_vel = someVertRefData && filterHealthy;        // vertical velocity estimate valid
-    status.flags.horiz_pos_rel = ((doingFlowNav && gndOffsetValid) || doingWindRelNav || doingNormalGpsNav || doingBodyVelNav) && filterHealthy;   // relative horizontal position estimate valid
+    status.flags.horiz_pos_rel = ((doingFlowNav && gndOffsetValid) || doingWindRelNav || doingVelNav || doingNormalGpsNav || doingBodyVelNav) && filterHealthy;   // relative horizontal position estimate valid
     status.flags.horiz_pos_abs = doingNormalGpsNav && filterHealthy; // absolute horizontal position estimate valid
     status.flags.vert_pos = !hgtTimeout && filterHealthy && !hgtNotAccurate; // vertical position estimate valid
     status.flags.terrain_alt = gndOffsetValid && filterHealthy;		// terrain height estimate valid
