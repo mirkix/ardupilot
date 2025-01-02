@@ -333,7 +333,7 @@ bool Copter::set_mode(Mode::Number mode, ModeReason reason)
         new_flightmode->requires_GPS() &&
         !copter.position_ok()) {
         mode_change_failed(new_flightmode, "requires position");
-//        return false;
+        return false;
     }
 
     // check for valid altitude if old mode did not require it but new one does

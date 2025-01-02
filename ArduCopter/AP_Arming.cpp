@@ -454,7 +454,7 @@ bool AP_Arming_Copter::mandatory_gps_checks(bool display_failure)
         if (!copter.position_ok()) {
             // vehicle level position estimate checks
             check_failed(display_failure, "Need Position Estimate");
-//            return false;
+            return false;
         }
     } else {
         if (fence_requires_gps) {
